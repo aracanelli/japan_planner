@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Japan Planner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    header {
+      background-color: #e74c3c;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    h1 {
+      margin: 0;
+    }
+    
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .card {
+      background-color: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    footer {
+      background-color: #34495e;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    .success {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+    
+    .error {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    
+    .info {
+      margin-top: 20px;
+      font-size: 14px;
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Japan Planner</h1>
+  </header>
+  
+  <main>
+    <div class="card">
+      <h2>Welcome to Japan Planner</h2>
+      <p class="success">✓ Static HTML is working correctly</p>
+      <p>This is a static HTML page that serves as an entry point for the Japan Planner app.</p>
+      
+      <div class="info">
+        <h3>Getting Started</h3>
+        <p>To run the full Japan Planner application:</p>
+        <ol>
+          <li>Make sure you have Node.js installed</li>
+          <li>Run <code>npm install</code> to install dependencies</li>
+          <li>Run <code>npm run dev</code> to start the development server</li>
+          <li>Open <a href="http://localhost:3000">http://localhost:3000</a> in your browser</li>
+        </ol>
+      </div>
+      
+      <div class="info">
+        <h3>Desktop Application</h3>
+        <p>To run the desktop version:</p>
+        <ol>
+          <li>Double-click the <code>JapanPlanner.bat</code> file</li>
+          <li>The application will open in a desktop window</li>
+        </ol>
+        <p>If you encounter issues, try running the diagnostic tool:</p>
+        <ol>
+          <li>Double-click the <code>Diagnostic.bat</code> file</li>
+          <li>Check the logs for any error messages</li>
+        </ol>
+      </div>
+      
+      <button id="testBtn">Test Browser Functionality</button>
+      <div id="testResult" style="margin-top: 1rem;"></div>
+    </div>
+  </main>
+  
+  <footer>
+    &copy; 2023 Japan Planner - A tool for planning your trip to Japan
+  </footer>
+  
+  <script>
+    document.getElementById('testBtn').addEventListener('click', function() {
+      const testResult = document.getElementById('testResult');
+      try {
+        // Test basic functionality
+        testResult.innerHTML = '<p class="success">Browser JavaScript is working correctly!</p>';
+        
+        // Add more detailed tests
+        const tests = [
+          { name: 'localStorage', test: () => {
+            localStorage.setItem('test', 'value');
+            const value = localStorage.getItem('test');
+            localStorage.removeItem('test');
+            return value === 'value';
+          }},
+          { name: 'fetch API', test: () => typeof fetch === 'function' },
+          { name: 'Promises', test: () => typeof Promise === 'function' },
+          { name: 'async/await', test: () => {
+            const asyncFunc = async () => true;
+            return asyncFunc() instanceof Promise;
+          }}
+        ];
+        
+        // Run tests and display results
+        const results = tests.map(t => {
+          try {
+            const passed = t.test();
+            return `<li>${t.name}: <span class="${passed ? 'success' : 'error'}">${passed ? 'PASS' : 'FAIL'}</span></li>`;
+          } catch (err) {
+            return `<li>${t.name}: <span class="error">ERROR - ${err.message}</span></li>`;
+          }
+        });
+        
+        testResult.innerHTML += `
+          <div class="info">
+            <h3>Browser Compatibility Tests:</h3>
+            <ul>${results.join('')}</ul>
+          </div>
+        `;
+      } catch (err) {
+        testResult.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html> 
