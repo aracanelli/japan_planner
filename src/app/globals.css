@@ -1,26 +1,115 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
+  --foreground: #111827;
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --gray-light: #f3f4f6;
+  --gray-mid: #6b7280;
+  --gray-dark: #374151;
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
 }
+
+@layer base {
+  html {
+    @apply text-base;
+  }
+  h1 {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  h2 {
+    @apply text-xl font-bold text-gray-900;
+  }
+  h3 {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  p {
+    @apply text-gray-700;
+  }
+  button {
+    @apply font-medium;
+  }
+  input, select, textarea {
+    @apply text-gray-900;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md focus:outline-none focus:ring-2 font-medium;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-sm p-4;
+  }
+  
+  .form-input {
+    @apply p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base;
+  }
+  
+  .tag {
+    @apply px-2 py-1 text-sm rounded-full font-medium;
+  }
+  
+  .tag-gray {
+    @apply bg-gray-200 text-gray-800;
+  }
+  
+  .tag-green {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .tag-yellow {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  .info-window {
+    @apply p-3 text-left;
+  }
+  
+  .info-window h3 {
+    @apply font-semibold text-lg text-gray-900 mb-1;
+  }
+  
+  .info-window p {
+    @apply text-base text-gray-700 mb-1;
+  }
+}
+
+/* Toast animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-fadeOut {
+  animation: fadeOut 0.3s ease-out forwards;
+} 
