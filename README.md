@@ -1,71 +1,75 @@
-# Japan Trip Planner
+# Japan Planner
 
-A web application for planning trips to Japan, finding points of interest, and calculating distances between locations.
+A comprehensive trip planning application for Japan travel. Plan your journey, find attractions, calculate routes, and manage your travel budget all in one place.
 
 ## Features
 
-- Search for places and attractions in Japan
-- View detailed information about locations (price, ratings, etc.)
-- Pin locations on a map
-- Calculate walking, driving, and transit distances between locations
-- Save locations for your trip
+- **Interactive Map**: Explore Japan with an interactive map interface
+- **Points of Interest**: Search and save attractions, restaurants, hotels, and more
+- **Route Planning**: Calculate routes between locations with multiple transportation options
+- **Trip Planner**: Create and manage detailed day-by-day trip itineraries
+- **Budget Management**: Track expenses for accommodation, food, activities, and more
+- **Currency Conversion**: View prices in JPY or CAD with automatic conversion
+- **Multi-day Stays**: Easily manage hotel bookings across multiple days
 
-## Technology Stack
+## Technologies Used
 
-- Next.js 14
+- Next.js 13+ with App Router
+- React 18
 - TypeScript
-- Google Maps API
-- Google Places API
-- Google Directions API
-- TailwindCSS
-- React Query
+- Tailwind CSS
+- Google Maps API integration
+- Jest for testing
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18 or later
-- A Google Maps API key with the following APIs enabled:
-  - Maps JavaScript API
-  - Places API
-  - Directions API
+- Node.js 16+
+- npm or yarn
+- Google Maps API key
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/japan-planner.git
-cd japan-planner
-```
+   ```
+   git clone https://github.com/aracanelli/japan_planner.git
+   cd japan-planner
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-```
+   ```
+   npm install
+   ```
 
-3. Create a `.env.local` file in the root directory and add your Google Maps API key:
-```
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-```
+3. Create a `.env.local` file in the root directory with your Google Maps API key:
+   ```
+   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
+   ```
 
 4. Start the development server:
-```bash
-npm run dev
-```
+   ```
+   npm run dev
+   ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Usage
 
-1. Search for places in Japan using the search tab
-2. Click on search results to add them to your saved locations
-3. Select two locations on the map to calculate distances between them
-4. Choose between walking, driving, or transit modes
+### Map Navigation
+- Click on the map to add pins
+- Search for specific locations using the search bar
+- Save points of interest for your trip
+
+### Trip Planning
+- Create a new trip with dates
+- Add saved locations to specific days
+- Track your budget for each day and category
+- Add notes for days and locations
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
 
 ## Acknowledgments
 
