@@ -51,7 +51,7 @@ function JapanPlanner() {
     addPin, 
     removePin, 
     togglePinSelection, 
-    calculateDistance, 
+    calculateDistanceAndDuration,
     clearSelection,
     updatePin
   } = useMapPins();
@@ -164,15 +164,9 @@ function JapanPlanner() {
     setActiveTab('saved');
   }, [addPin, getDetails, setActiveTab]);
 
-  const handleCalculateRoute = async (mode: TravelMode) => {
-    if (selectedPins.length !== 2) return;
-    
-    try {
-      // Just set the current route mode without calculating distance or showing info
-      setCurrentRouteMode(mode);
-    } catch (error) {
-      console.error('Error setting route mode:', error);
-    }
+  const handleCalculateRoute = (mode: TravelMode) => {
+    setCurrentRouteMode(mode);
+    calculateDistanceAndDuration(mode);
   };
 
   return (

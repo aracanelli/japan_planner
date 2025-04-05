@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Static export configuration
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 // Define types for exchange rates
 type SupportedCurrency = 'JPY' | 'CAD' | 'USD' | 'EUR' | 'GBP';
 type ExchangeRateMap = {
@@ -36,76 +40,47 @@ const EXCHANGE_RATES: ExchangeRateMap = {
   }
 };
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const amount = searchParams.get('amount');
-  const fromCurrency = searchParams.get('from') || 'JPY';
-  const toCurrency = searchParams.get('to') || 'CAD';
-
-  console.log(`Converting ${amount} ${fromCurrency} to ${toCurrency}`);
-
-  if (!amount) {
-    console.log('Error: Amount is required');
-    return NextResponse.json({ error: 'Amount is required' }, { status: 400 });
-  }
-
-  // Parse amount and validate
-  const numericAmount = parseFloat(amount);
-  if (isNaN(numericAmount)) {
-    console.log('Error: Invalid amount format');
-    return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
-  }
-
-  console.log(`Parsed amount: ${numericAmount}`);
-
-  try {
-    // Validate currencies
-    const from = fromCurrency as SupportedCurrency;
-    const to = toCurrency as SupportedCurrency;
-    
-    // Get the exchange rate
-    if (!EXCHANGE_RATES[from] || !EXCHANGE_RATES[from][to]) {
-      console.log(`Error: Conversion rate not available for ${from} to ${to}`);
-      return NextResponse.json({ 
-        error: `Conversion rate not available for ${from} to ${to}` 
-      }, { status: 400 });
+// For static export, we'll return a static JSON representation of all possible conversions
+// Client-side code will handle the actual conversion
+export async function GET() {
+  // Return the static exchange rates table
+  return NextResponse.json({ 
+    rates: EXCHANGE_RATES,
+    // Include some example conversions for common amounts
+    examples: {
+      "1000_JPY_to_CAD": {
+        amount: 1000,
+        from: "JPY",
+        to: "CAD",
+        result: 9.67,
+        formatted: "C$9.67"
+      },
+      "5000_JPY_to_CAD": {
+        amount: 5000,
+        from: "JPY",
+        to: "CAD",
+        result: 48.35,
+        formatted: "C$48.35"
+      },
+      "10000_JPY_to_CAD": {
+        amount: 10000,
+        from: "JPY",
+        to: "CAD",
+        result: 96.70,
+        formatted: "C$96.70"
+      },
+      "15000_JPY_to_CAD": {
+        amount: 15000,
+        from: "JPY",
+        to: "CAD",
+        result: 145.05,
+        formatted: "C$145.05"
+      }
     }
-
-    const rate = EXCHANGE_RATES[from][to] as number;
-    console.log(`Exchange rate: 1 ${from} = ${rate} ${to}`);
-    
-    const convertedAmount = numericAmount * rate;
-    console.log(`Converted amount: ${numericAmount} ${from} = ${convertedAmount} ${to}`);
-    
-    const formatted = formatCurrency(convertedAmount, to);
-    console.log(`Formatted result: ${formatted}`);
-
-    const response = {
-      original: {
-        amount: numericAmount,
-        currency: from
-      },
-      converted: {
-        amount: convertedAmount,
-        currency: to,
-        formatted: formatted
-      },
-      rate: rate
-    };
-    
-    console.log('Response payload:', JSON.stringify(response));
-    
-    return NextResponse.json(response);
-  } catch (error) {
-    console.error('Currency conversion error:', error);
-    return NextResponse.json(
-      { error: 'Failed to convert currency' },
-      { status: 500 }
-    );
-  }
+  });
 }
 
-// Helper function to format currency
+// Helper function to format currency - kept for reference
 function formatCurrency(amount: number, currency: SupportedCurrency): string {
   switch (currency) {
     case 'JPY':

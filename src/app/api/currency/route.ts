@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Add static export configuration
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 // Catch-all route handler to prevent 404 errors
 export async function GET(request: NextRequest) {
   // Simply return a 200 OK response with empty data

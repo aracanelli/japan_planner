@@ -37,6 +37,7 @@ export const useMapPins = () => {
   const [selectedPins, setSelectedPins] = useState<MapPin[]>([]);
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
   
   /**
    * Load pins from localStorage on mount and handle cleanup on unmount
@@ -196,20 +197,29 @@ export const useMapPins = () => {
     setSelectedPins(prev => [...prev, selectedPin]);
   }, [pins, selectedPins]);
 
-  const calculateDistance = useCallback(async (mode: TravelMode) => {
+  const calculateDistanceAndDuration = async (mode: TravelMode = 'DRIVING') => {
     if (selectedPins.length !== 2) {
-      setRouteInfo(null);
+      console.error('Need exactly 2 pins selected to calculate distance');
       return;
     }
 
+    setIsCalculatingRoute(true);
+
     try {
-      const result = await calculateRoute(selectedPins[0], selectedPins[1], mode);
+      // Fix type error by ensuring we pass the position property
+      const result = await calculateRoute(
+        { lat: selectedPins[0].position.lat, lng: selectedPins[0].position.lng },
+        { lat: selectedPins[1].position.lat, lng: selectedPins[1].position.lng },
+        mode
+      );
       setRouteInfo(result);
     } catch (error) {
       console.error('Error calculating distance:', error);
       setRouteInfo(null);
+    } finally {
+      setIsCalculatingRoute(false);
     }
-  }, [selectedPins]);
+  };
 
   const clearSelection = useCallback(() => {
     setPins(prev => prev.map(p => ({ ...p, isSelected: false })));
@@ -264,10 +274,11 @@ export const useMapPins = () => {
     selectedPins,
     routeInfo,
     error,
+    isCalculatingRoute,
     addPin,
     removePin,
     togglePinSelection,
-    calculateDistance,
+    calculateDistanceAndDuration,
     clearSelection,
     getSelectedPins,
     clearPins,

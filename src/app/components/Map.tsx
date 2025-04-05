@@ -25,7 +25,7 @@ interface MapProps {
   onPinSelect: (id: string) => void;
   routeMode?: TravelMode;
   routeInfo?: any | null;
-  onCalculateRoute?: (mode: TravelMode) => Promise<void>;
+  onCalculateRoute: (mode: TravelMode) => void;
   isCalculating?: boolean;
 }
 
@@ -46,7 +46,7 @@ const Map: React.FC<MapProps> = ({
   onPinSelect, 
   routeMode,
   routeInfo = null,
-  onCalculateRoute = () => Promise.resolve(),
+  onCalculateRoute = () => {},
   isCalculating = false
 }) => {
   const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null);
