@@ -60,12 +60,24 @@ export interface SavedLocation {
   pins: PointOfInterest[];
 }
 
+// New interface for custom expenses
+export interface CustomExpense {
+  id: string;
+  name: string;
+  amount: number;
+  category: 'accommodation' | 'food' | 'activities' | 'transportation' | 'shopping' | 'other';
+  date: string; // ISO format date string
+  notes?: string;
+  isPaid?: boolean;
+}
+
 // New types for trip planner functionality
 export interface TripDay {
   id: string;
   date: string;  // ISO format date string
   dayNumber: number;
   locations: ScheduledLocation[];
+  customExpenses: CustomExpense[]; // New field for custom expenses
   notes?: string;
   weather?: {
     condition?: string;

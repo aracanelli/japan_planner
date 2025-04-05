@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useTripPlanner } from '../hooks/useTripPlanner';
-import { PointOfInterest, TripDay, ScheduledLocation, TripPlan } from '../types';
+import { PointOfInterest, TripDay, ScheduledLocation, TripPlan, CustomExpense } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link';
+import CustomExpensesSection from './CustomExpensesSection';
+import BudgetSummary from './BudgetSummary';
 
 // Helper function to format dates without timezone adjustment
 const formatDateWithoutTimezoneAdjustment = (dateString: string) => {
@@ -51,7 +53,12 @@ const TripPlanner = () => {
     resetTripPlanner,
     switchTrip,
     deleteTrip,
-    duplicateTrip
+    duplicateTrip,
+    addCustomExpense,
+    updateCustomExpense,
+    removeCustomExpense,
+    getCustomExpensesByCategory,
+    getTotalExpensesByCategory
   } = useTripPlanner();
   
   const [showNewTripForm, setShowNewTripForm] = useState(!tripPlan);
@@ -112,6 +119,13 @@ const TripPlanner = () => {
   const handleDuplicateTrip = (tripId: string) => {
     duplicateTrip(tripId);
     setShowTripsList(false);
+  };
+  
+  // Function to collect all custom expenses from all days
+  const getAllCustomExpenses = () => {
+    if (!tripPlan) return [];
+    
+    return tripPlan.days.flatMap(day => day.customExpenses);
   };
   
   if (isLoading) {
@@ -373,6 +387,7 @@ const TripPlanner = () => {
   
   const totalBudget = getTotalBudget();
   const totalBudgetValue = Object.values(totalBudget).reduce((sum: number, value: number) => sum + value, 0);
+  const allCustomExpenses = getAllCustomExpenses();
   
   return (
     <div className="container mx-auto p-4">
@@ -421,29 +436,19 @@ const TripPlanner = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="p-4 border rounded-md">
-            <h3 className="font-semibold text-sm text-gray-500 uppercase mb-2">Trip Dates</h3>
-            <p className="text-lg">
-              {formatDateWithoutTimezoneAdjustment(tripPlan.startDate)} - {formatDateWithoutTimezoneAdjustment(tripPlan.endDate)}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              {tripPlan.days.length} days
-            </p>
+        <div className="grid grid-cols-1 gap-4 mb-6">
+          <div className="flex items-center">
+            <div className="text-gray-600 mr-4">Dates:</div>
+            <div className="font-medium">
+              {formatDateWithoutTimezoneAdjustment(tripPlan.startDate)} to {formatDateWithoutTimezoneAdjustment(tripPlan.endDate)}
+              <span className="ml-2 text-sm text-gray-500">({tripPlan.days.length} days)</span>
+            </div>
           </div>
           
-          <div className="p-4 border rounded-md">
-            <h3 className="font-semibold text-sm text-gray-500 uppercase mb-2">Total Budget</h3>
-            <p className="text-lg font-semibold text-green-600">
-              {tripPlan.currency === 'JPY' ? '¥' : '$'}{totalBudgetValue.toLocaleString()}
-            </p>
-            <div className="mt-1 text-xs text-gray-500 grid grid-cols-2 gap-1">
-              <div>Accommodation: {tripPlan.currency === 'JPY' ? '¥' : '$'}{totalBudget.accommodation.toLocaleString()}</div>
-              <div>Food: {tripPlan.currency === 'JPY' ? '¥' : '$'}{totalBudget.food.toLocaleString()}</div>
-              <div>Activities: {tripPlan.currency === 'JPY' ? '¥' : '$'}{totalBudget.activities.toLocaleString()}</div>
-              <div>Transportation: {tripPlan.currency === 'JPY' ? '¥' : '$'}{totalBudget.transportation.toLocaleString()}</div>
-              <div>Shopping: {tripPlan.currency === 'JPY' ? '¥' : '$'}{totalBudget.shopping.toLocaleString()}</div>
-              <div>Other: {tripPlan.currency === 'JPY' ? '¥' : '$'}{totalBudget.other.toLocaleString()}</div>
+          <div className="flex items-center">
+            <div className="text-gray-600 mr-4">Currency:</div>
+            <div className="font-medium">
+              {tripPlan.currency === 'JPY' ? 'Japanese Yen (¥)' : 'Canadian Dollar ($)'}
             </div>
           </div>
           
@@ -458,6 +463,13 @@ const TripPlanner = () => {
           </div>
         </div>
         
+        {/* Budget Summary */}
+        <BudgetSummary 
+          budget={totalBudget}
+          customExpenses={allCustomExpenses}
+          currency={tripPlan.currency}
+        />
+        
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">Daily Planner</h2>
           <div className="space-y-6">
@@ -470,6 +482,9 @@ const TripPlanner = () => {
                 onUpdateLocation={updateScheduledLocation}
                 onUpdateNotes={updateDayNotes}
                 currency={tripPlan.currency}
+                addCustomExpense={addCustomExpense}
+                updateCustomExpense={updateCustomExpense}
+                removeCustomExpense={removeCustomExpense}
               />
             ))}
           </div>
@@ -486,6 +501,9 @@ interface DayCardProps {
   onUpdateLocation: (dayId: string, locationId: string, updates: Partial<ScheduledLocation>) => void;
   onUpdateNotes: (dayId: string, notes: string) => void;
   currency: string;
+  addCustomExpense: (dayId: string, expense: Omit<CustomExpense, 'id'>) => any;
+  updateCustomExpense: (dayId: string, expenseId: string, updates: Partial<CustomExpense>) => void;
+  removeCustomExpense: (dayId: string, expenseId: string) => void;
 }
 
 const DayCard: React.FC<DayCardProps> = ({
@@ -494,7 +512,10 @@ const DayCard: React.FC<DayCardProps> = ({
   onRemoveLocation,
   onUpdateLocation,
   onUpdateNotes,
-  currency
+  currency,
+  addCustomExpense,
+  updateCustomExpense,
+  removeCustomExpense
 }) => {
   const [showAddLocation, setShowAddLocation] = useState(false);
   
@@ -597,6 +618,23 @@ const DayCard: React.FC<DayCardProps> = ({
             No locations planned for this day
           </div>
         )}
+        
+        {/* Custom Expenses Section */}
+        <CustomExpensesSection
+          expenses={day.customExpenses}
+          dayId={day.id}
+          onAddExpense={(dayId, expense) => {
+            // Set the date to the current day's date
+            const expenseWithDate = {
+              ...expense,
+              date: day.date
+            };
+            addCustomExpense(dayId, expenseWithDate);
+          }}
+          onUpdateExpense={updateCustomExpense}
+          onRemoveExpense={removeCustomExpense}
+          currency={currency}
+        />
       </div>
     </div>
   );

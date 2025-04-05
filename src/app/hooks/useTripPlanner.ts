@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TripPlan, TripDay, ScheduledLocation, PointOfInterest } from '../types';
+import { TripPlan, TripDay, ScheduledLocation, PointOfInterest, CustomExpense } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Define type for budget categories
@@ -31,6 +31,7 @@ const createEmptyDay = (date: string, dayNumber: number): TripDay => ({
   date,
   dayNumber,
   locations: [],
+  customExpenses: [],
   budget: { ...DEFAULT_BUDGET },
   notes: '',
 });
@@ -633,6 +634,167 @@ export const useTripPlanner = () => {
     setCurrentTripId(null);
   }, []);
   
+  // Add a custom expense to a specific day
+  const addCustomExpense = useCallback((dayId: string, expense: Omit<CustomExpense, 'id'>) => {
+    if (!currentTrip) return null;
+    
+    const newExpense: CustomExpense = {
+      ...expense,
+      id: uuidv4()
+    };
+    
+    setAllTrips(prevTrips => {
+      return prevTrips.map(trip => {
+        if (trip.id !== currentTripId) return trip;
+        
+        return {
+          ...trip,
+          days: trip.days.map(day => {
+            if (day.id !== dayId) return day;
+            
+            // Add expense to day and update budget
+            const newExpenses = [...day.customExpenses, newExpense];
+            const newBudget = { ...day.budget };
+            
+            // Update budget category
+            newBudget[newExpense.category] = (newBudget[newExpense.category] || 0) + newExpense.amount;
+            
+            return {
+              ...day,
+              customExpenses: newExpenses,
+              budget: newBudget
+            };
+          })
+        };
+      });
+    });
+    
+    return newExpense;
+  }, [currentTrip, currentTripId]);
+  
+  // Update a custom expense
+  const updateCustomExpense = useCallback((dayId: string, expenseId: string, updates: Partial<CustomExpense>) => {
+    if (!currentTrip) return false;
+    
+    setAllTrips(prevTrips => {
+      return prevTrips.map(trip => {
+        if (trip.id !== currentTripId) return trip;
+        
+        return {
+          ...trip,
+          days: trip.days.map(day => {
+            if (day.id !== dayId) return day;
+            
+            const expenseIndex = day.customExpenses.findIndex(e => e.id === expenseId);
+            if (expenseIndex === -1) return day;
+            
+            const oldExpense = day.customExpenses[expenseIndex];
+            const updatedExpense = { ...oldExpense, ...updates };
+            const newExpenses = [...day.customExpenses];
+            newExpenses[expenseIndex] = updatedExpense;
+            
+            // Recalculate budget if amount or category changed
+            const newBudget = { ...day.budget };
+            
+            if (updates.amount !== undefined || updates.category !== undefined) {
+              // Remove old expense from budget
+              newBudget[oldExpense.category] = Math.max(0, (newBudget[oldExpense.category] || 0) - oldExpense.amount);
+              
+              // Add updated expense to budget
+              const category = updates.category || oldExpense.category;
+              const amount = updates.amount !== undefined ? updates.amount : oldExpense.amount;
+              newBudget[category] = (newBudget[category] || 0) + amount;
+            }
+            
+            return {
+              ...day,
+              customExpenses: newExpenses,
+              budget: newBudget
+            };
+          })
+        };
+      });
+    });
+    
+    return true;
+  }, [currentTrip, currentTripId]);
+  
+  // Remove a custom expense
+  const removeCustomExpense = useCallback((dayId: string, expenseId: string) => {
+    if (!currentTrip) return false;
+    
+    setAllTrips(prevTrips => {
+      return prevTrips.map(trip => {
+        if (trip.id !== currentTripId) return trip;
+        
+        return {
+          ...trip,
+          days: trip.days.map(day => {
+            if (day.id !== dayId) return day;
+            
+            const expense = day.customExpenses.find(e => e.id === expenseId);
+            if (!expense) return day;
+            
+            // Update budget
+            const newBudget = { ...day.budget };
+            newBudget[expense.category] = Math.max(0, (newBudget[expense.category] || 0) - expense.amount);
+            
+            return {
+              ...day,
+              customExpenses: day.customExpenses.filter(e => e.id !== expenseId),
+              budget: newBudget
+            };
+          })
+        };
+      });
+    });
+    
+    return true;
+  }, [currentTrip, currentTripId]);
+  
+  // Get custom expenses by category
+  const getCustomExpensesByCategory = useCallback(() => {
+    if (!currentTrip) return {};
+    
+    const categories: Record<BudgetCategory, CustomExpense[]> = {
+      accommodation: [],
+      food: [],
+      activities: [],
+      transportation: [],
+      shopping: [],
+      other: []
+    };
+    
+    currentTrip.days.forEach(day => {
+      day.customExpenses.forEach(expense => {
+        categories[expense.category].push(expense);
+      });
+    });
+    
+    return categories;
+  }, [currentTrip]);
+  
+  // Get total expenses by category
+  const getTotalExpensesByCategory = useCallback(() => {
+    if (!currentTrip) return DEFAULT_BUDGET;
+    
+    const totals = { ...DEFAULT_BUDGET };
+    
+    currentTrip.days.forEach(day => {
+      // Add scheduled location expenses
+      day.locations.forEach(location => {
+        totals[location.category] += location.budget;
+      });
+      
+      // Add custom expenses
+      day.customExpenses.forEach(expense => {
+        totals[expense.category] += expense.amount;
+      });
+    });
+    
+    return totals;
+  }, [currentTrip]);
+  
   return {
     tripPlan: currentTrip,
     allTrips,
@@ -649,6 +811,11 @@ export const useTripPlanner = () => {
     updateScheduledLocation,
     updateDayNotes,
     getTotalBudget,
-    resetTripPlanner
+    resetTripPlanner,
+    addCustomExpense,
+    updateCustomExpense,
+    removeCustomExpense,
+    getCustomExpensesByCategory,
+    getTotalExpensesByCategory
   };
 }; 
